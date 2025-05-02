@@ -1,7 +1,6 @@
 <script setup>
   import {ref,onMounted} from 'vue'
   import axios from 'axios'
-
   import CardList from '../components/CardList.vue'
 
   const favorites = ref([])
@@ -43,6 +42,23 @@ onMounted(async () => {
 </script>
 <template>
   <h1 class="text-center text-3xl text-gray-500 mb-8">Избранное</h1>
+  <div v-if="favorites.length === 0" class="text-center py-12">
+      <div class="mx-auto max-w-md">
+        <img
+          src="/prohibited-line.png"
+          alt="Пустое избранное"
+          class="mx-auto h-10 w-10 mb-6"
+        >
+        <h2 class="text-2xl font-medium text-gray-700 mb-2">В избранном ничего нет</h2>
+        <p class="text-gray-500 mb-6">Добавьте хотя бы одну пару кроссовок в избранное</p>
+        <router-link
+          to="/"
+          class="inline-block bg-gray-500 hover:bg-gray-900 text-white px-6 py-2 rounded-md transition"
+        >
+          Вернуться в каталог
+        </router-link>
+      </div>
+    </div>
 
   <CardList :items="favorites"
             is-favorites
