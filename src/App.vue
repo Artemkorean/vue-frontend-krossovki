@@ -2,6 +2,7 @@
   import { ref, provide, watch, computed } from 'vue';
   import Header from './components/Header.vue';
   import Drawer from './components/Drawer.vue';
+  import Footer from './components/Footer.vue';
   import axios from 'axios';
 
 
@@ -60,16 +61,18 @@
     v-if="drawerOpen"
     :total-price="totalPrice"
     :vat-price="vatPrice"
-    
-
   />
+
   <div class=" bg-white w-4/5 m-auto  rounded-xl shadow-xl mt-10">
     <Header :total-price="totalPrice" @open-drawer="openDrawer" />
 
     <div class=" p-10">
       <router-view></router-view>
     </div>
+
+    <Footer/>
   </div>
+
 </template>
 
 
