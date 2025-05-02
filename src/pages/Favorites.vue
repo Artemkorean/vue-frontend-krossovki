@@ -42,7 +42,7 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <h1 class=" text-3xl font-bold mb-8">Mои закладки</h1>
+  <h1 class="text-center text-3xl text-gray-500 mb-8">Избранное</h1>
 
   <CardList :items="favorites"
             is-favorites

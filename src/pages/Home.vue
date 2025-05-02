@@ -128,7 +128,7 @@
 
 <template>
   <div class="flex justify-between items-center">
-        <h2 class=" text-3xl font-bold mb-8">Все кроссовки</h2>
+        <!-- <h2 class=" text-3xl text-gray-500 mb-8">Все кроссовки</h2> -->
 
         <div class="flex gap-4">
           <select @change="onChangeSelect" class="py-2 px-3 border rounded-md outline-none">

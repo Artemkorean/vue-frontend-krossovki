@@ -70,7 +70,9 @@
       <router-view></router-view>
     </div>
 
-    <Footer/>
+    <div class="mb-10">
+      <Footer/>
+    </div>
   </div>
 
 </template>
