@@ -6,7 +6,7 @@
     isFavorites:Boolean
 })
 
-const emit = defineEmits(['addToFavorites','addToCart'])
+const emit = defineEmits(['addToFavorites','addToCart','removeFromFavorites'])
 
 
 </script>
@@ -22,8 +22,10 @@ const emit = defineEmits(['addToFavorites','addToCart'])
       :price="item.price"
       :onClickFavorite="isFavorites ? null : () => emit('addToFavorite',item)"
       :onClickAdd="isFavorites ? null : () => emit('addToCart',item)"
+      :onClickRemove="isFavorites ? () => emit('removeFromFavorites', item) : null"
       :isFavorite="item.isFavorite"
       :isAdded="item.isAdded"
+      :isFavorites="isFavorites"
     />
   </div>
 </template>
