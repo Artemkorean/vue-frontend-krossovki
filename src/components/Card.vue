@@ -12,12 +12,13 @@ defineProps({
   onClickAdd: Function,
   onClickRemove: Function,
   onClickFavorite: Function,
+  onClickCard: Function
 })
 
 </script>
 
 <template>
-  <div class="h-full">
+  <div class="h-full" @click="onClickCard">
     <div class="relative bg-white border border-slate-100 rounded-3xl p-8 cursor-pointer transition hover:-translate-y-2 hover:shadow-xl h-full flex flex-col">
       <img
       v-if="isFavorites"

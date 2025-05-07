@@ -45,14 +45,11 @@
   )
 
   provide('cart',{
-/* корзина*/
-
     cart,
     closeDrawer,
     openDrawer,
     addToCart,
     removeFromCart
-
   });
 </script>
 
