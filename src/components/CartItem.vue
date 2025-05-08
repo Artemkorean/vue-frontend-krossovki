@@ -6,6 +6,7 @@
     title: String,
     imageUrl:String,
     price: Number,
+    size: String
   })
 </script>
 
@@ -15,6 +16,10 @@
 
     <div class="flex flex-col flex-1">
       <p>{{ title }}</p>
+
+      <div v-if="size" class="text-sm text-gray-500 mt-1">
+        Размер: {{ size }}
+      </div>
 
       <div class="flex justify-between mt-2">
         <b class="flex-1">{{ price }}</b>

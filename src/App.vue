@@ -26,9 +26,12 @@
   }
 
   const addToCart = (item) => {
-    cart.value.push(item)
-    item.isAdded = true
-  }
+  cart.value.push({
+    ...item,
+    isAdded: true,
+    selectedSize: item.selectedSize // Сохраняем выбранный размер
+  });
+}
 
   const removeFromCart = (item) => {
     cart.value.splice(cart.value.indexOf(item),1)

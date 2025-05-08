@@ -31,6 +31,13 @@ const toggleCart = () => {
   });
 };
 
+const confirmSize = () => {
+  emit('add-to-cart', {
+    ...props.product,
+    selectedSize: selectedSize.value // Добавляем выбранный размер
+  });
+};
+
 const selectSize = (size) => {
   selectedSize.value = size;
 };

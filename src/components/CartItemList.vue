@@ -15,6 +15,7 @@
       :title="item.title"
       :price="item.price"
       :image-url="item.imageUrl"
+      :size="item.selectedSize"
       @on-click-remove="() => removeFromCart(item)"
     />
 
