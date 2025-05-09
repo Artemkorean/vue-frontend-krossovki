@@ -8,7 +8,7 @@
 
   /* корзина*/
   const cart = ref([])
-  const isCreatingOrder = ref(false)
+  // const isCreatingOrder = ref(false)
   const drawerOpen = ref(false)
   const totalPrice = computed(
     () => cart.value.reduce((acc,item) => acc + item.price, 0)
@@ -74,7 +74,6 @@
       <Footer/>
     </div>
   </div>
-
 </template>
 
 

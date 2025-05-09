@@ -1,41 +1,61 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 const props = defineProps({
   isOpen: Boolean,
   product: Object,
   sizes: Array,
-  features: Array
+  features: Array,
+  isInCart: Boolean
 });
 
 const emit = defineEmits(['close', 'toggleFavorite', 'toggleCart']);
 
 const selectedSize = ref(null);
+const localIsInCart = ref(props.isInCart); // Локальная копия состояния
+
+// Синхронизируем локальное состояние с пропсами
+watch(() => props.isInCart, (newVal) => {
+  localIsInCart.value = newVal;
+  if (!newVal) {
+    resetModalState();
+  }
+});
+
+const resetModalState = () => {
+  selectedSize.value = null;
+};
 
 const closeModal = () => {
+  resetModalState();
   emit('close');
 };
+
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen) {
+    resetModalState();
+    // При открытии синхронизируем состояние
+    localIsInCart.value = props.isInCart;
+  }
+});
 
 const toggleFavorite = () => {
   emit('toggleFavorite', props.product);
 };
 
-const toggleCart = () => {
-  if (props.sizes && props.sizes.length && !selectedSize.value) {
+const handleCartAction = () => {
+  if (props.sizes && props.sizes.length && !selectedSize.value && !localIsInCart.value) {
     alert('Пожалуйста, выберите размер');
     return;
   }
+
   emit('toggleCart', {
     ...props.product,
     selectedSize: selectedSize.value
   });
-};
 
-const confirmSize = () => {
-  emit('add-to-cart', {
-    ...props.product,
-    selectedSize: selectedSize.value // Добавляем выбранный размер
-  });
+  // Локально обновляем состояние сразу
+  localIsInCart.value = !localIsInCart.value;
 };
 
 const selectSize = (size) => {
@@ -82,20 +102,20 @@ const selectSize = (size) => {
                   >
                 </button>
                 <button
-                  @click.stop="toggleCart"
-                  class="p-2 rounded-full hover:bg-gray-100"
+                  @click.stop="handleCartAction"
+                  class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition-colors"
+                  :class="{
+                    'bg-red-50 border-red-200 hover:bg-red-100 text-red-700': localIsInCart,
+                    'bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-700': !localIsInCart
+                  }"
                 >
-                  <img
-                    :src="product.isAdded ? '/checked.svg' : '/plus.svg'"
-                    alt="Add to cart"
-                    class="w-6 h-6"
-                  >
+                  {{ localIsInCart ? 'Убрать из корзины' : 'Добавить в корзину' }}
                 </button>
               </div>
             </div>
 
             <!-- Размеры -->
-            <div class="mb-6" v-if="sizes && sizes.length">
+            <div class="mb-6" v-if="sizes && sizes.length && !localIsInCart">
               <h3 class="text-lg font-semibold mb-3">Размеры:</h3>
               <div class="flex flex-wrap gap-2">
                 <button
