@@ -33,10 +33,10 @@
   });
 }
 
-  const removeFromCart = (item) => {
-    cart.value.splice(cart.value.indexOf(item),1)
-    item.isAdded = false
-  }
+const removeFromCart = (item) => {
+  cart.value = cart.value.filter(cartItem => cartItem.id !== item.id);
+  localStorage.removeItem(`cartState_${item.id}`);
+};
 
 
   watch(

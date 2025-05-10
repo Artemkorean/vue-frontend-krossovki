@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted, inject } from 'vue';
 
 const props = defineProps({
   isOpen: Boolean,
@@ -10,41 +10,58 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'toggleFavorite', 'toggleCart']);
+const { cart } = inject('cart');
 
 const selectedSize = ref(null);
-const localIsInCart = ref(props.isInCart); // Локальная копия состояния
+const localIsInCart = ref(props.isInCart);
 
-// Синхронизируем локальное состояние с пропсами
+// Обновляем состояние при изменении корзины
+const updateCartState = () => {
+  const isInCart = cart.value.some(item => item.id === props.product.id);
+  localIsInCart.value = isInCart;
+
+  if (!isInCart) {
+    selectedSize.value = null;
+  }
+};
+
+// Инициализация состояния
+onMounted(() => {
+  updateCartState();
+});
+
+// Следим за изменениями в корзине
+watch(() => cart.value, () => {
+  updateCartState();
+}, { deep: true });
+
+// Синхронизация с пропсами
 watch(() => props.isInCart, (newVal) => {
   localIsInCart.value = newVal;
-  if (!newVal) {
-    resetModalState();
+});
+
+// При открытии модалки обновляем состояние
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen) {
+    updateCartState();
+
+    // Восстанавливаем выбранный размер из localStorage
+    const savedState = localStorage.getItem(`cartState_${props.product.id}`);
+    if (savedState) {
+      const { selectedSize: savedSize } = JSON.parse(savedState);
+      if (localIsInCart.value) {
+        selectedSize.value = savedSize;
+      }
+    }
   }
 });
 
-const resetModalState = () => {
-  selectedSize.value = null;
-};
-
 const closeModal = () => {
-  resetModalState();
   emit('close');
 };
 
-watch(() => props.isOpen, (isOpen) => {
-  if (isOpen) {
-    resetModalState();
-    // При открытии синхронизируем состояние
-    localIsInCart.value = props.isInCart;
-  }
-});
-
-const toggleFavorite = () => {
-  emit('toggleFavorite', props.product);
-};
-
 const handleCartAction = () => {
-  if (props.sizes && props.sizes.length && !selectedSize.value && !localIsInCart.value) {
+  if (props.sizes?.length && !selectedSize.value && !localIsInCart.value) {
     alert('Пожалуйста, выберите размер');
     return;
   }
@@ -54,13 +71,28 @@ const handleCartAction = () => {
     selectedSize: selectedSize.value
   });
 
-  // Локально обновляем состояние сразу
+  // Обновляем состояние сразу
   localIsInCart.value = !localIsInCart.value;
+
+  // Сохраняем в localStorage только при добавлении в корзину
+  if (localIsInCart.value) {
+    localStorage.setItem(`cartState_${props.product.id}`, JSON.stringify({
+      isInCart: localIsInCart.value,
+      selectedSize: selectedSize.value
+    }));
+  } else {
+    localStorage.removeItem(`cartState_${props.product.id}`);
+  }
 };
 
 const selectSize = (size) => {
   selectedSize.value = size;
 };
+
+const buttonState = computed(() => ({
+  disabled: localIsInCart.value,
+  text: localIsInCart.value ? 'Товар добавлен' : 'Добавить в корзину'
+}));
 </script>
 
 <template>
@@ -91,7 +123,7 @@ const selectSize = (size) => {
             <div class="flex items-center mb-6">
               <span class="text-3xl font-bold mr-4">{{ product.price }} руб.</span>
               <div class="flex space-x-2">
-                <button
+                <!-- <button
                   @click.stop="toggleFavorite"
                   class="p-2 rounded-full hover:bg-gray-100"
                 >
@@ -100,16 +132,17 @@ const selectSize = (size) => {
                     alt="Favorite"
                     class="w-6 h-6"
                   >
-                </button>
+                </button> -->
                 <button
-                  @click.stop="handleCartAction"
-                  class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition-colors"
+                  @click="handleCartAction"
+                  :disabled="buttonState.disabled"
+                  class="px-4 py-2 border rounded-lg transition-colors duration-200"
                   :class="{
-                    'bg-red-50 border-red-200 hover:bg-red-100 text-red-700': localIsInCart,
-                    'bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-700': !localIsInCart
+                    'bg-gray-400 text-white cursor-not-allowed': localIsInCart,
+                    'bg-gray-600 text-white hover:bg-gray-800': !localIsInCart
                   }"
                 >
-                  {{ localIsInCart ? 'Убрать из корзины' : 'Добавить в корзину' }}
+                {{ buttonState.text }}
                 </button>
               </div>
             </div>
@@ -123,7 +156,7 @@ const selectSize = (size) => {
                   :key="size"
                   @click="selectSize(size)"
                   class="px-4 py-2 border rounded-lg hover:bg-gray-100"
-                  :class="{'border-blue-500 bg-blue-50': selectedSize === size}"
+                  :class="{' bg-slate-900 text-white': selectedSize === size}"
                 >
                   {{ size }}
                 </button>

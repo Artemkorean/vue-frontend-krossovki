@@ -27,12 +27,15 @@
       isCreating.value = true
       const { data } = await axios.post(`https://4d52dc6e33fee8ad.mokky.dev/orders`,{
         items: cart.value,
-        totalPrice: props.totalPrice.value
+        totalPrice: props.totalPrice
       })
+
+      cart.value.forEach(item => {
+        localStorage.removeItem(`cartState_${item.id}`);
+      });
+
       cart.value = [];
-
       orderId.value = data.id
-
     } catch(err){
       console.log(err)
     } finally {
