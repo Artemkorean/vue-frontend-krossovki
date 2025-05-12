@@ -23,20 +23,20 @@
     <ul class=" flex items-center gap-10">
       <li @click="() => emit('openDrawer')" class=" flex items-center gap-3 cursor-pointer text-gray-500 hover:text-black">
         <img src="/cart.svg" alt="cart">
-        <span>{{ totalPrice }} rub</span>
+        <span>{{ totalPrice }} Руб.</span>
       </li>
 
       <router-link to="/favorites">
         <li class=" flex items-center gap-3 cursor-pointer text-gray-500 hover:text-black">
           <img src="/heart.svg" alt="heart">
-          <span>Favorites</span>
+          <span>Избранное</span>
       </li>
       </router-link>
 
       <router-link to="/profile">
         <li class=" flex items-center gap-3 cursor-pointer text-gray-500 hover:text-black">
           <img src="/profile.svg" alt="profile">
-          <span>Profile</span>
+          <span>Профиль</span>
         </li>
       </router-link>
     </ul>

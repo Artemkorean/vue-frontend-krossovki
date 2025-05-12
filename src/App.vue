@@ -64,7 +64,10 @@ const removeFromCart = (item) => {
   />
 
   <div class=" bg-white w-4/5 m-auto  rounded-xl shadow-xl mt-10">
-    <Header :total-price="totalPrice" @open-drawer="openDrawer" />
+    <Header
+      :total-price="totalPrice"
+      @open-drawer="openDrawer"
+    />
 
     <div class=" p-10">
       <router-view></router-view>

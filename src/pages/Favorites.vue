@@ -2,10 +2,11 @@
   import {ref,onMounted} from 'vue'
   import axios from 'axios'
   import CardList from '../components/CardList.vue'
+  import ProductModals from '../components/ProductModal.vue'
 
-  const favorites = ref([])
+const favorites = ref([])
 
-  const fetchFavorites = async () => {
+const fetchFavorites = async () => {
   try {
     const { data } = await axios.get('https://4d52dc6e33fee8ad.mokky.dev/favorites?_relations=items')
     favorites.value = data.map((obj) => obj.item)
@@ -60,8 +61,13 @@ onMounted(async () => {
       </div>
     </div>
 
-  <CardList :items="favorites"
-            is-favorites
-            @remove-from-favorites="removeFromFavorites"
+  <CardList
+    :items="favorites"
+    is-favorites
+    @remove-from-favorites="removeFromFavorites"
   />
+  <ProductModal
+    @button-state="buttonState"
+  />
+
 </template>
