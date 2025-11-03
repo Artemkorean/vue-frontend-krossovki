@@ -2,7 +2,7 @@
   import {ref,onMounted} from 'vue'
   import axios from 'axios'
   import CardList from '../components/CardList.vue'
-  import ProductModals from '../components/ProductModal.vue'
+  import ProductModal from '../components/ProductModal.vue'
 
 const favorites = ref([])
 
@@ -66,8 +66,6 @@ onMounted(async () => {
     is-favorites
     @remove-from-favorites="removeFromFavorites"
   />
-  <ProductModal
-    @button-state="buttonState"
-  />
+  
 
 </template>
