@@ -1,21 +1,22 @@
 // src/stores/auth.js
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, readonly } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-
+import { useUserStore } from './user'
 
 // Ключи для localStorage
 const TOKEN_STORAGE_KEY = 'auth_token'
 const USER_STORAGE_KEY = 'user_info'
 
 export const useAuthStore = defineStore('auth', () => {
+  const router = useRouter()
+  const userStore = useUserStore() // ✅ Получаем один раз — это безопасно в Pinia setup store
+
   // Состояние
   const token = ref(localStorage.getItem(TOKEN_STORAGE_KEY) || null)
-  // УБРАЛИ: const userStore = useUserStore() // Больше не получаем здесь
   const loading = ref(false)
   const error = ref(null)
-  const router = useRouter()
 
   // Вычисляемые свойства
   const isAuthenticated = computed(() => !!token.value)
@@ -28,31 +29,33 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      // ДОБАВИЛИ: Получаем экземпляр userStore внутри функции
-      const userStore = useUserStore();
-      // ИСПРАВЛЕНО: Добавлен http://
       const response = await axios.post('http://localhost:4000/auth/login', { email, password })
 
       const { token: newToken, user: userData } = response.data
 
+      // Сохраняем токен и пользователя
       token.value = newToken
       localStorage.setItem(TOKEN_STORAGE_KEY, newToken)
 
-      // ИСПОЛЬЗУЕМ: userStore, полученный внутри функции
       userStore.setUser(userData)
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData))
 
-      await router.push('/admin-profile')
-
+      // 🔁 Перенаправление по роли
+      if (userData.role === 'admin') {
+        await router.push('/adminProfile')
+      } else {
+        await router.push('/home')
+      }
     } catch (err) {
       console.error('Login error:', err)
       error.value = err.response?.data?.message || 'Ошибка входа'
-      // ИСПОЛЬЗУЕМ: userStore для logout внутри login
-      const userStore = useUserStore(); // Получаем снова для logout
-      userStore.clearUser() // Очищаем данные пользователя из user store
+
+      // Очищаем данные при ошибке
+      userStore.clearUser()
       token.value = null
       localStorage.removeItem(TOKEN_STORAGE_KEY)
       localStorage.removeItem(USER_STORAGE_KEY)
+
       throw err
     } finally {
       loading.value = false
@@ -60,13 +63,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const logout = () => {
-    // ДОБАВИЛИ: Получаем экземпляр userStore внутри функции
-    const userStore = useUserStore();
-    token.value = null
     userStore.clearUser()
+    token.value = null
     localStorage.removeItem(TOKEN_STORAGE_KEY)
     localStorage.removeItem(USER_STORAGE_KEY)
-    // router.push('/') // Можно перенаправить после выхода
+    // router.push('/') // опционально
   }
 
   const initializeAuth = () => {
@@ -78,18 +79,14 @@ export const useAuthStore = defineStore('auth', () => {
       if (storedUserData) {
         try {
           const parsedUserData = JSON.parse(storedUserData)
-          // ДОБАВИЛИ: Получаем экземпляр userStore внутри функции
-          const userStore = useUserStore();
-          userStore.setUser(parsedUserData) // Устанавливаем данные
+          userStore.setUser(parsedUserData)
         } catch (e) {
-          console.error('Ошибка при разборе данных пользователя из localStorage:', e)
+          console.error('Ошибка при разборе данных пользователя:', e)
+          // Очищаем повреждённые данные
           localStorage.removeItem(TOKEN_STORAGE_KEY)
           localStorage.removeItem(USER_STORAGE_KEY)
           token.value = null
         }
-      } else {
-        localStorage.removeItem(TOKEN_STORAGE_KEY)
-        token.value = null
       }
     }
   }
@@ -98,12 +95,9 @@ export const useAuthStore = defineStore('auth', () => {
     token: readonly(token),
     loading: readonly(loading),
     error: readonly(error),
-    isAuthenticated, // Вычисляемое свойство
-    login,    // Добавлены действия
+    isAuthenticated,
+    login,
     logout,
     initializeAuth,
   }
 })
-
-import { readonly } from 'vue'
-import { useUserStore } from './user' // <-- ИМПОРТИРУЕМ В КОНЦЕ ФАЙЛА или в начале, но используем внутри функций

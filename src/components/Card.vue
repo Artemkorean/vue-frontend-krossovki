@@ -1,20 +1,17 @@
 <script setup>
-
-
-defineProps({
-  id: Number,
-  title :String,
-  imageUrl: String,
-  price: Number,
-  isFavorite: Boolean,
-  isFavorites: Boolean,
-  isAdded: Boolean,
-  onClickAdd: Function,
-  onClickRemove: Function,
-  onClickFavorite: Function,
-  onClickCard: Function
-})
-
+  defineProps({
+    id: Number,
+    title :String,
+    imageUrl: String,
+    price: Number,
+    isFavorite: Boolean,
+    isFavorites: Boolean,
+    isAdded: Boolean,
+    onClickAdd: Function,
+    onClickRemove: Function,
+    onClickFavorite: Function,
+    onClickCard: Function
+  })
 </script>
 
 <template>
@@ -46,13 +43,6 @@ defineProps({
           <span class="text-slate-200">Цена:</span>
           <b>{{ price }} руб.</b>
         </div>
-
-        <!-- <img
-          v-if="onClickAdd"
-          @click.stop="onClickAdd"
-          :src="!isAdded ? '/plus.svg' : '/checked.svg'"
-          alt="plus"
-        /> -->
       </div>
     </div>
   </div>

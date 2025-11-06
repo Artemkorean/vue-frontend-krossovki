@@ -41,7 +41,7 @@
           <div class="text-center mt-4">
             <span class="text-sm text-gray-600">Уже есть аккаунт?</span>
             <router-link
-              to="/profile"
+              to="/index"
               class="text-sm text-blue-600 hover:underline"
             >
               Войти

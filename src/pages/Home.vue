@@ -4,9 +4,10 @@
   import CardList from '../components/CardList.vue';
   import axios from 'axios';
   import {inject} from 'vue';
-  
+  import { useItem } from '@/composables/useItem';
 
 
+  const { fetchAllItems, loading: loadingItems, error: errorItems } = useItem();
   const {cart,addToCart,removeFromCart} = inject('cart')
   const items = ref([])
 
@@ -79,37 +80,37 @@
     }
   }
 
-  const fetchItems = async () => {
-    try{
-      const params = {
-        sortBy: filters.sortBy
+  // const fetchAllItems = async () => {
+  //   try{
+  //     const params = {
+  //       sortBy: filters.sortBy
 
-      }
+  //     }
 
-      if(filters.searchQuery) {
-        params.title = `*${filters.searchQuery}*`;
-      }
+  //     if(filters.searchQuery) {
+  //       params.title = `*${filters.searchQuery}*`;
+  //     }
 
-      const { data }= await axios.get('https://4d52dc6e33fee8ad.mokky.dev/items',{
-        params
-      } );
+  //     const { data }= await axios.get('https://4d52dc6e33fee8ad.mokky.dev/items',{
+  //       params
+  //     } );
 
-      items.value = data.map((obj) => ({
-        ...obj,
-        isFavorite: false,
-        favoriteId:null,
-        isAdded: false
-      }));
-    }catch(err){
-      console.log(err)
-    }
-  }
+  //     items.value = data.map((obj) => ({
+  //       ...obj,
+  //       isFavorite: false,
+  //       favoriteId:null,
+  //       isAdded: false
+  //     }));
+  //   }catch(err){
+  //     console.log(err)
+  //   }
+  // }
 
   onMounted(async () => {
     const localCart = localStorage.getItem('cart')
     cart.value = localCart ? JSON.parse(localCart) : []
 
-    await fetchItems();
+    await fetchAllItems();
     await fetchFavorites()
 
     items.value = items.value.map((item) => ({
@@ -125,7 +126,7 @@
     }))
   })
 
-  watch(filters, fetchItems);
+  watch(filters, fetchAllItems);
 </script>
 
 <template>
