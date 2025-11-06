@@ -18,7 +18,8 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      role TEXT DEFAULT 'buyer',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -30,6 +31,7 @@ db.serialize(() => {
       name TEXT NOT NULL,
       description TEXT,
       price REAL NOT NULL,
+      sizes TEXT,
       image TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -42,22 +44,10 @@ db.serialize(() => {
       userid INTEGER NOT NULL,
       itemid INTEGER NOT NULL,
       quantity INTEGER DEFAULT 1,
+      size TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (userid) REFERENCES users (id) ON DELETE CASCADE,
       FOREIGN KEY (itemid) REFERENCES items (id) ON DELETE CASCADE
-    )
-  `);
-
-  // Таблица избранного
-  db.run(`
-    CREATE TABLE IF NOT EXISTS favorites (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      userid INTEGER NOT NULL,
-      itemid INTEGER NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (userid) REFERENCES users (id) ON DELETE CASCADE,
-      FOREIGN KEY (itemid) REFERENCES items (id) ON DELETE CASCADE,
-      UNIQUE(userid, itemid)  -- чтобы не дублировались пары
     )
   `);
 
@@ -80,7 +70,8 @@ db.serialize(() => {
       orderid INTEGER NOT NULL,
       itemid INTEGER NOT NULL,
       quantity INTEGER NOT NULL,
-      price_at_time REAL NOT NULL,  -- цена товара на момент заказа
+      price_at_time REAL NOT NULL,
+      size TEXT NOT NULL,  
       FOREIGN KEY (orderid) REFERENCES orders (id) ON DELETE CASCADE,
       FOREIGN KEY (itemid) REFERENCES items (id) ON DELETE CASCADE
     )
