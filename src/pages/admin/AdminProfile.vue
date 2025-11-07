@@ -48,7 +48,7 @@
 import { ref, onMounted } from 'vue'
 import CreateItemModal from '../../components/admin/CreateItemModal.vue'
 import { useItem } from '../../composables/useItem.js'
-
+import AdminItemList from '../../components/admin/AdminItemList.vue'
 // Извлекаем методы и состояния из useItem
 // Обратите внимание: loading и error теперь readonly refs
 const { fetchAllItems, error: itemError, createItem: createItemFunc, updateItem: updateItemFunc, deleteItem } = useItem() // Переименовываем для избежания конфликта имен
