@@ -1,14 +1,15 @@
 // src/stores/user.js
 
 // Перемещаем константу в начало файла, за пределы defineStore
-const USER_STORAGE_KEY = 'user_info'
+const USER_STORAGE_KEY = 'sneakers-user'
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue' // <-- Добавлен readonly
+import { ref, computed, readonly } from 'vue' // <-- Добавлен readonly
 
 export const useUserStore = defineStore('user', () => {
   // Состояние
-  const user = ref(null) // { id, email, username, role, ... }
+  const initialUser = JSON.parse(localStorage.getItem(USER_STORAGE_KEY)) || null
+  const user = ref(initialUser)
 
   // Вычисляемые свойства
   const isAdmin = computed(() => user.value?.role === 'admin')
@@ -45,5 +46,5 @@ export const useUserStore = defineStore('user', () => {
   }
 })
 
-// <-- Добавлен импорт readonly
-import { readonly } from 'vue'
+
+

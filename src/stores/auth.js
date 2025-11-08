@@ -6,8 +6,8 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from './user'
 
 // Ключи для localStorage
-const TOKEN_STORAGE_KEY = 'auth_token'
-const USER_STORAGE_KEY = 'user_info'
+const TOKEN_STORAGE_KEY = 'sneakers-jwt'
+const USER_STORAGE_KEY = 'sneakers-user'
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
@@ -31,9 +31,10 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await axios.post('http://localhost:4000/auth/login', { email, password })
 
-      const { token: newToken, user: userData } = response.data
+      const { jwt: newToken, user: userData } = response.data
 
-      // Сохраняем токен и пользователя
+      console.log('Saving token:', newToken) // 🔥 Добавьте
+      console.log('Saving user:', userData)
       token.value = newToken
       localStorage.setItem(TOKEN_STORAGE_KEY, newToken)
 
@@ -90,6 +91,8 @@ export const useAuthStore = defineStore('auth', () => {
       }
     }
   }
+
+  initializeAuth()
 
   return {
     token: readonly(token),

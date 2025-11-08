@@ -5,7 +5,15 @@
     <main class="max-w-2xl mx-auto py-10">
       <div class="bg-white rounded-lg shadow p-8">
         <p>Добро пожаловать, администратор!</p>
-
+        <!-- Кнопка выхода -->
+        <div class="mt-4 flex justify-end">
+          <button
+            @click="handleLogout"
+            class="text-sm text-red-500 hover:text-red-700 font-medium"
+          >
+            Выйти
+          </button>
+        </div>
         <!-- Кнопка для открытия модального окна -->
         <div class="mt-6">
           <!-- Показываем кнопку, если не идет загрузка -->
@@ -49,10 +57,13 @@ import { ref, onMounted } from 'vue'
 import CreateItemModal from '../../components/admin/CreateItemModal.vue'
 import { useItem } from '../../composables/useItem.js'
 import AdminItemList from '../../components/admin/AdminItemList.vue'
-// Извлекаем методы и состояния из useItem
-// Обратите внимание: loading и error теперь readonly refs
+import { useAuthStore } from '../../stores/auth.js'
+import { useRouter } from 'vue-router'
+
 const { fetchAllItems, error: itemError, createItem: createItemFunc, updateItem: updateItemFunc, deleteItem } = useItem() // Переименовываем для избежания конфликта имен
 
+const authStore = useAuthStore()
+const router = useRouter()
 // Локальное состояние для списка товаров и состояния загрузки
 const items = ref([])
 const loading = ref(false) // Состояние загрузки для этого компонента
@@ -62,10 +73,24 @@ const error = ref(null) // Локальное состояние ошибки (�
 const isCreateModalOpen = ref(false)
 const itemToEdit = ref(null)
 
+// Функция выхода
+const handleLogout = async () => {
+  try {
+    await authStore.logout() // очищает токен, пользователя и localStorage
+    await router.push('/') // перенаправляем на главную
+  } catch (err) {
+    console.error('Ошибка при выходе:', err)
+  }
+}
 // Функция открытия модального окна
 const openCreateModal = () => {
   itemToEdit.value = null // Сбрасываем перед созданием
   isCreateModalOpen.value = true
+}
+
+const openEditModal = (item) => {
+  itemToEdit.value = item         // устанавливаем редактируемый товар
+  isCreateModalOpen.value = true  // открываем то же модальное окно (в режиме редактирования)
 }
 
 // Функция закрытия модального окна
