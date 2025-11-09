@@ -5,10 +5,12 @@
   import axios from 'axios';
   import {inject} from 'vue';
   import { useItem } from '../composables/useItem';
+  import { useFavorite } from '../composables/useFavorites';
 
 
   const { fetchAllItems, loading: loadingItems, error: errorItems } = useItem();
   const {cart,addToCart,removeFromCart} = inject('cart')
+  const { favorites } = useFavorite();
   const items = ref([])
 
 
@@ -34,52 +36,6 @@
     filters.searchQuery = event.target.value
   },500)
 
-  const addToFavorite = async (item) => {
-    try{
-      if(!item.isFavorite){
-        const obj={
-        item_id: item.id,
-
-      }
-        item.isFavorite = true
-
-        const { data }= await axios.post('https://4d52dc6e33fee8ad.mokky.dev/favorites',obj);
-
-        item.favoriteId = data.id
-      } else{
-        item.isFavorite = false;
-        await axios.delete(`https://4d52dc6e33fee8ad.mokky.dev/favorites/${item.favoriteId}`)
-        item.favoriteId = null;
-      }
-    } catch(err){
-        console.log(err)
-    }
-  }
-
-  const fetchFavorites = async () => {
-    try{
-      const { data:favorites }= await axios.get('https://4d52dc6e33fee8ad.mokky.dev/favorites');
-
-      items.value = items.value.map(item => {
-        const favorite = favorites.find(favorite => favorite.item_id === item.id);
-
-        if(!favorite){
-          return item
-        }
-
-        return {
-          ...item,
-          isFavorite: true,
-          favoriteId: favorite.id
-        }
-      });
-
-      console.log(items.value)
-    }catch(err){
-      console.log(err)
-    }
-  }
-
   onMounted(async () => {
     const localCart = localStorage.getItem('cart')
     cart.value = localCart ? JSON.parse(localCart) : []
@@ -88,12 +44,10 @@
 
     items.value = data.map(obj => ({
     ...obj,
-    isFavorite: false,
-    favoriteId: null,
-    isAdded: false
+    isFavorite: favorites.value.has(obj.id), // ✅ проверяем по ID
+    favoriteId: favorites.value.has(obj.id) ? obj.id : null,
+    isAdded: cart.value.some(cartItem => cartItem.id === obj.id)
   }));
-    await fetchFavorites()
-
     items.value = items.value.map((item) => ({
       ...item,
       isAdded: cart.value.some((cartItem) => cartItem.id === item.id)
@@ -109,14 +63,14 @@
 
   watch(filters, async () => {
   // Перезагружаем товары с новыми фильтрами
-  const data = await fetchAllItems();
-  items.value = data.map(obj => ({
-    ...obj,
-    isFavorite: false,
-    favoriteId: null,
-    isAdded: cart.value.some(cartItem => cartItem.id === obj.id)
-  }));
-});
+    const data = await fetchAllItems();
+    items.value = data.map(obj => ({
+      ...obj,
+      isFavorite: favorites.value.has(obj.id), // ✅ проверяем по ID
+      favoriteId: favorites.value.has(obj.id) ? obj.id : null,
+      isAdded: cart.value.some(cartItem => cartItem.id === obj.id)
+    }));
+  });
 </script>
 
 <template>
@@ -153,7 +107,6 @@
     <CardList
       v-else
       :items="items"
-      @add-to-favorite="addToFavorite"
       @add-to-cart="onClickAddPlus"
     />
   </div>

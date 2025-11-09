@@ -1,14 +1,16 @@
 <script setup>
   import Card from './Card.vue';
   import ProductModal from './ProductModal.vue';
+  import { useFavorite } from '../composables/useFavorites.js';
   import { ref } from 'vue';
 
   defineProps({
     items:Array,
     isFavorites:Boolean
 })
+const { toggleFavorite: toggleFavoriteLocal } = useFavorite();
 
-const emit = defineEmits(['addToFavorites','addToCart','removeFromFavorites'])
+const emit = defineEmits(['add-to-cart', 'remove-from-favorites'])
 
 const modalProduct = ref(null);
 const isModalOpen = ref(false);
@@ -23,7 +25,7 @@ const closeModal = () => {
 };
 
 const toggleFavorite = (item) => {
-  emit('addToFavorites', item);
+  toggleFavoriteLocal(item); // вызывает логику из useFavorite
   // Обновляем состояние в локальной копии для модального окна
   if (modalProduct.value && modalProduct.value.id === item.id) {
     modalProduct.value = {
@@ -34,7 +36,7 @@ const toggleFavorite = (item) => {
 };
 
 const toggleCart = (item) => {
-  emit('addToCart', item);
+  emit('add-to-cart', item);
   if (modalProduct.value && modalProduct.value.id === item.id) {
     modalProduct.value.isAdded = !modalProduct.value.isAdded;
   }
@@ -51,9 +53,9 @@ const toggleCart = (item) => {
       :title="item.title"
       :imageUrl="item.imageUrl"
       :price="item.price"
-      :onClickFavorite="isFavorites ? null : () => emit('addToFavorite',item)"
-      :onClickAdd="isFavorites ? null : () => emit('addToCart',item)"
-      :onClickRemove="isFavorites ? () => emit('removeFromFavorites', item) : null"
+      :onClickFavorite="isFavorites ? null : () => toggleFavoriteLocal(item)"
+      :onClickAdd="isFavorites ? null : () => emit('add-to-cart',item)"
+      :onClickRemove="isFavorites ? () => emit('remove-from-favorites', item) : null"
       :onClickCard="() => openModal(item)"
       :isFavorite="item.isFavorite"
       :isAdded="item.isAdded"

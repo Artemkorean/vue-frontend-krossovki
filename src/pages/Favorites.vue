@@ -1,48 +1,47 @@
 <script setup>
-  import {ref,onMounted} from 'vue'
+  import {ref,onMounted,computed } from 'vue'
+  import { useFavorite } from '../composables/useFavorites';
   import axios from 'axios'
   import CardList from '../components/CardList.vue'
-  import ProductModal from '../components/ProductModal.vue'
+  import { useItem } from '@/composables/useItem';
+  // import ProductModal from '../components/ProductModal.vue'
 
-const favorites = ref([])
+const { fetchAllItems, loading, error } = useItem();
+const allItems = ref([]);
 
-const fetchFavorites = async () => {
-  try {
-    const { data } = await axios.get('https://4d52dc6e33fee8ad.mokky.dev/favorites?_relations=items')
-    favorites.value = data.map((obj) => obj.item)
-  } catch (err) {
-    console.log(err)
-  }
-}
+const { favorites, removeFromFavorite } = useFavorite();
 
-const removeFromFavorites = async (item) => {
-  try {
-    // Сначала находим ID в таблице избранного
-    const { data: favoritesData } = await axios.get(`https://4d52dc6e33fee8ad.mokky.dev/favorites?item_id=${item.id}`)
+const favoriteItems = computed(() => {
+  return allItems.value.filter(item => favorites.value.has(item.id));
+});
 
-    if (favoritesData.length > 0) {
-      await axios.delete(`https://4d52dc6e33fee8ad.mokky.dev/favorites/${favoritesData[0].id}`)
-      favorites.value = favorites.value.filter(fav => fav.id !== item.id)
-    }
-  } catch (err) {
-    console.log('Ошибка при удалении из избранного:', err)
-  }
-}
-
-onMounted(fetchFavorites)
+const removeFromFavorites = (item) => {
+  removeFromFavorite(item); // удаляем из localStorage
+};
 
 onMounted(async () => {
-  try{
-    const {data} = await axios.get('https://4d52dc6e33fee8ad.mokky.dev/favorites?_relations=items')
-
-    favorites.value = data.map((obj) => obj.item)
-  } catch(err){
-    console.log(err)
+  try {
+    const data = await fetchAllItems();
+    allItems.value = data.map(obj => ({
+      ...obj,
+      isFavorite: favorites.value.has(obj.id), // отмечаем, если в избранном
+      favoriteId: favorites.value.has(obj.id) ? obj.id : null
+    }));
+  } catch (err) {
+    console.error('Ошибка при загрузке товаров:', err);
   }
-})
+});
 </script>
 <template>
   <h1 class="text-center text-3xl text-gray-500 mb-8">Избранное</h1>
+  <!-- Показываем загрузку -->
+  <div v-if="loading" class="text-center py-12">
+    Загрузка избранных товаров...
+  </div>
+  <!-- Показываем ошибку -->
+  <div v-else-if="error" class="text-center py-12 text-red-500">
+    Ошибка: {{ error }}
+  </div>
   <div v-if="favorites.length === 0" class="text-center py-12">
       <div class="mx-auto max-w-md">
         <img
@@ -62,10 +61,10 @@ onMounted(async () => {
     </div>
 
   <CardList
-    :items="favorites"
-    is-favorites
+    :items="favoriteItems"
+    is-favorites="true"
     @remove-from-favorites="removeFromFavorites"
   />
-  
+
 
 </template>
