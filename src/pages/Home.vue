@@ -4,7 +4,7 @@
   import CardList from '../components/CardList.vue';
   import axios from 'axios';
   import {inject} from 'vue';
-  import { useItem } from '@/composables/useItem';
+  import { useItem } from '../composables/useItem';
 
 
   const { fetchAllItems, loading: loadingItems, error: errorItems } = useItem();
@@ -80,37 +80,18 @@
     }
   }
 
-  // const fetchAllItems = async () => {
-  //   try{
-  //     const params = {
-  //       sortBy: filters.sortBy
-
-  //     }
-
-  //     if(filters.searchQuery) {
-  //       params.title = `*${filters.searchQuery}*`;
-  //     }
-
-  //     const { data }= await axios.get('https://4d52dc6e33fee8ad.mokky.dev/items',{
-  //       params
-  //     } );
-
-  //     items.value = data.map((obj) => ({
-  //       ...obj,
-  //       isFavorite: false,
-  //       favoriteId:null,
-  //       isAdded: false
-  //     }));
-  //   }catch(err){
-  //     console.log(err)
-  //   }
-  // }
-
   onMounted(async () => {
     const localCart = localStorage.getItem('cart')
     cart.value = localCart ? JSON.parse(localCart) : []
 
-    await fetchAllItems();
+    const data = await fetchAllItems();
+
+    items.value = data.map(obj => ({
+    ...obj,
+    isFavorite: false,
+    favoriteId: null,
+    isAdded: false
+  }));
     await fetchFavorites()
 
     items.value = items.value.map((item) => ({
@@ -126,7 +107,16 @@
     }))
   })
 
-  watch(filters, fetchAllItems);
+  watch(filters, async () => {
+  // Перезагружаем товары с новыми фильтрами
+  const data = await fetchAllItems();
+  items.value = data.map(obj => ({
+    ...obj,
+    isFavorite: false,
+    favoriteId: null,
+    isAdded: cart.value.some(cartItem => cartItem.id === obj.id)
+  }));
+});
 </script>
 
 <template>
@@ -155,7 +145,13 @@
   </div>
 
   <div class="mt-10">
+    <!-- Показываем сообщение, если загрузка -->
+    <div v-if="loadingItems">Загрузка товаров...</div>
+
+    <!-- Показываем ошибку, если есть -->
+    <div v-else-if="errorItems" class="text-red-500">{{ errorItems }}</div>
     <CardList
+      v-else
       :items="items"
       @add-to-favorite="addToFavorite"
       @add-to-cart="onClickAddPlus"

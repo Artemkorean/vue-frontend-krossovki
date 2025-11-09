@@ -76,8 +76,8 @@ const itemToEdit = ref(null)
 // Функция выхода
 const handleLogout = async () => {
   try {
-    await authStore.logout() // очищает токен, пользователя и localStorage
-    await router.push('/') // перенаправляем на главную
+    authStore.logout() // очищает токен, пользователя и localStorage
+    router.push('/') // перенаправляем на главную
   } catch (err) {
     console.error('Ошибка при выходе:', err)
   }

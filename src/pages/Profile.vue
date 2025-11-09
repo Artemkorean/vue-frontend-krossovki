@@ -1,17 +1,35 @@
 <!-- src/pages/Profile.vue -->
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
+import { useAuthStore } from '../stores/auth.js'
+import { useUserStore } from '../stores/user.js';
+import { useRouter } from 'vue-router'
 
-const user = ref({
-  id: 1,
-  email: 'john@dsff.com', // Используем email из ваших предпочтений
-  username: 'JohnDoe'     // Можно добавить имя пользователя
-});
 
-// Функции-заглушки для действий
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const router = useRouter()
+
+const user = computed(() => userStore.user);
+if (!user.value) {
+  router.push('/login');
+}
+
+
 const viewInfo = () => {
-  // Логика просмотра информации (например, открытие модального окна)
-  alert(`Просмотр информации о пользователе: ${user.value.username || user.value.email}`);
+  if (!user.value) {
+    alert('Пользователь не авторизован');
+    return;
+  }
+
+  const infoLines = [
+    `ID: ${user.value.id}`,
+    `Имя пользователя: ${user.value.username || '—'}`,
+    `Email: ${user.value.email}`,
+    `Роль: ${user.value.role || 'user'}`
+  ];
+
+  alert(`👤 Информация о профиле:\n\n${infoLines.join('\n')}`);
 };
 
 const editProfile = () => {
@@ -26,46 +44,53 @@ const deleteProfile = () => {
     // Здесь будет логика удаления через API и, возможно, выход из системы
   }
 };
+
+const handleLogout = async () => {
+  try {
+    authStore.logout() // очищает токен, пользователя и localStorage
+    router.push('/') // перенаправляем на главную
+  } catch (err) {
+    console.error('Ошибка при выходе:', err)
+  }
+}
 </script>
 
 <template>
-  <div>
-    <h1 class="text-center text-3xl text-gray-500">Профиль</h1>
-    <main class="max-w-2xl mx-auto py-10">
-      <div class="bg-white rounded-lg shadow p-8">
-        <div class="space-y-6 mb-8">
-          <h2 class="text-xl font-semibold text-gray-700">Детали профиля</h2>
-          <div class="space-y-2">
-            <p><span class="font-medium">ID:</span> {{ user.id }}</p>
-            <p><span class="font-medium">Email:</span> {{ user.email }}</p>
-            <p><span class="font-medium">Имя пользователя:</span> {{ user.username || 'Не установлено' }}</p>
-            <!-- Добавьте другие поля профиля по мере необходимости -->
-          </div>
-        </div>
-
-        <div class="flex flex-col space-y-4">
-          <button
-            @click="viewInfo"
-            class="bg-gray-500 text-white py-2 px-6 rounded-md hover:bg-gray-600 transition"
-          >
-            Посмотреть информацию
-          </button>
-
-          <button
-            @click="editProfile"
-            class="bg-gray-500 text-white py-2 px-6 rounded-md hover:bg-gray-600 transition"
-          >
-            Изменить профиль
-          </button>
-
-          <button
-            @click="deleteProfile"
-            class="bg-red-500 text-white py-2 px-6 rounded-md hover:bg-red-600 transition"
-          >
-            Удалить профиль
-          </button>
-        </div>
+  <div class="min-h-screen  flex justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-md p-6 space-y-6">
+      <div class="text-center">
+        <h1 class="text-2xl font-bold text-gray-800">Привет, {{ user?.username || user?.email || 'пользователь' }}!</h1>
+        <!-- <p class="text-gray-500 mt-2">Выберите действие ниже</p> -->
       </div>
-    </main>
+
+      <div class="space-y-3">
+        <button
+          @click="viewInfo"
+          class="w-full py-3 px-4 bg-gray-500 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+        >
+        Просмотреть информацию о профиле
+        </button>
+
+        <button
+          @click="editProfile"
+          class="w-full py-3 px-4 bg-gray-500 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+        >
+        Редактировать профиль
+        </button>
+        <button
+          @click="deleteProfile"
+          class="w-full py-3 px-4 bg-gray-500 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+        >
+        Удалить профиль
+        </button>
+
+        <button
+          @click="handleLogout"
+          class="w-full py-3 px-4 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+        >
+        Выйти из системы
+        </button>
+      </div>
+    </div>
   </div>
 </template>
