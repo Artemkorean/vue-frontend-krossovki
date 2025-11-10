@@ -31,18 +31,7 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Сервер запущен на http://localhost:${PORT}`);
 });
-// AuthService.initializeAdminUser()
-//   .then(() => {
-//     console.log("Проверка/создание администратора завершено.");
-//     const PORT = process.env.PORT || 4000;
-//     server.listen(PORT, () => {
-//       console.log(`Сервер запущен на порту ${PORT}`);
-//     });
-//   })
-//   .catch(err => {
-//     console.error("Критическая ошибка при инициализации:", err);
-//     process.exit(1); // Завершаем процесс, если инициализация критически важна
-//   });
+
 
 const shutdown = () => {
   console.log('Останавливаем сервер... ⛔');

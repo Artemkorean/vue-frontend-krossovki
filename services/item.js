@@ -2,16 +2,7 @@
 import db from '../config/database.js'; // Импортируем подключение к БД
 
 class ItemService {
-  /**
-   * Создает новый товар в базе данных.
-   * @param {string} name - Название товара.
-   * @param {number} price - Цена товара.
-   * @param {string} [description=''] - Описание товара (опционально).
-   * @param {string} [sizes=''] - Доступные размеры (например, "S,M,L" или JSON строка) (опционально).
-   * @param {string} [image=''] - Путь/URL к изображению товара (опционально).
-   * @returns {Promise<Object>} Объект с информацией о созданном товаре.
-   * @throws {Error} Если произошла ошибка базы данных или валидации.
-   */
+
   static async createItem(name, price, description = '', sizes = '', image = '') {
     // Валидация (базовая)
     if (!name || typeof name !== 'string' || !price || typeof price !== 'number' || price <= 0) {
@@ -30,8 +21,7 @@ class ItemService {
           console.error('Ошибка при создании товара:', err);
           reject(new Error(`Ошибка базы данных при создании товара: ${err.message}`));
         } else {
-          // 'this' в контексте db.run ссылается на объект Statement
-          // this.lastID - ID последней вставленной строки
+          
           resolve({
             id: this.lastID,
             name,
@@ -46,12 +36,6 @@ class ItemService {
     });
   }
 
-  /**
-   * Удаляет товар из базы данных по ID.
-   * @param {number} itemId - ID товара для удаления.
-   * @returns {Promise<Object>} Объект с сообщением об успешном удалении.
-   * @throws {Error} Если товар не найден или произошла ошибка базы данных.
-   */
   static async deleteItemById(itemId) {
     // Валидация (базовая)
     if (!itemId || typeof itemId !== 'number' || itemId <= 0) {
@@ -79,8 +63,6 @@ class ItemService {
       });
     });
   }
-
-  // --- Дополнительно: Метод для получения товара по ID ---
   // Может быть полезен для проверки существования или получения данных перед обновлением
   static async getItemById(itemId) {
     return new Promise((resolve, reject) => {
@@ -96,7 +78,6 @@ class ItemService {
     });
   }
 
-  // --- Дополнительно: Метод для получения всех товаров ---
   static async getAllItems(limit = 100, offset = 0) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM items ORDER BY created_at DESC LIMIT ? OFFSET ?`;
