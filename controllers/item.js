@@ -2,11 +2,7 @@
 import ItemService from '../services/item.js';
 
 class ItemController {
-  /**
-   * Создание нового товара.
-   * Ожидает тело запроса с полями: name, price, description, sizes, image.
-   * Требует аутентификацию администратора.
-   */
+
   static async createItem(req, res) {
     try {
       const { name, price, description = '', sizes = '', image = '' } = req.body;
@@ -15,11 +11,6 @@ class ItemController {
       if (!name || typeof name !== 'string' || !price || typeof price !== 'number' || price <= 0) {
         return res.status(400).json({ error: 'Название и положительная цена обязательны' });
       }
-
-      // req.user устанавливается middleware authenticateUser
-      // Проверка, что вызывающий (req.user) является администратором,
-      // должна происходить в middleware requireAdmin, примененном к маршруту.
-
       const result = await ItemService.createItem(name, price, description, sizes, image);
 
       res.status(201).json(result);
@@ -33,11 +24,6 @@ class ItemController {
     }
   }
 
-  /**
-   * Удаление товара по ID.
-   * Ожидает ID товара в параметрах URL (req.params.id).
-   * Требует аутентификацию администратора.
-   */
   static async deleteItemById(req, res) {
     try {
       const { id } = req.params; // ID товара из URL
@@ -68,11 +54,6 @@ class ItemController {
     }
   }
 
-  /**
-   * Получение товара по ID.
-   * Ожидает ID товара в параметрах URL (req.params.id).
-   * Может быть доступно без аутентификации или только администратору, в зависимости от требований.
-   */
   static async getItemById(req, res) {
     try {
       const { id } = req.params;
@@ -96,10 +77,6 @@ class ItemController {
     }
   }
 
-  /**
-   * Получение списка всех товаров.
-   * Может быть доступно без аутентификации или только администратору, в зависимости от требований.
-   */
   static async getAllItems(req, res) {
     try {
       // Опционально: получить limit и offset из query параметров
@@ -119,6 +96,34 @@ class ItemController {
       return res.status(500).json({ error: 'Произошла ошибка при получении списка товаров' });
     }
   }
+
+  static async updateItem(req, res) {
+  try {
+    const { id } = req.params;
+    const { name, price, description = '', sizes = '', image = '' } = req.body;
+
+    // Валидация
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ error: 'ID товара должен быть числом' });
+    }
+    if (!name || typeof name !== 'string' || !price || typeof price !== 'number' || price <= 0) {
+      return res.status(400).json({ error: 'Название и положительная цена обязательны' });
+    }
+
+    const result = await ItemService.updateItem(Number(id), { name, price, description, sizes, image });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Ошибка в ItemController.updateItem:', error);
+    if (error.message.includes('Ошибка базы данных')) {
+      return res.status(500).json({ error: error.message });
+    }
+    if (error.message.includes('не найден')) {
+      return res.status(404).json({ error: error.message });
+    }
+    return res.status(400).json({ error: error.message });
+  }
+}
 }
 
 export default ItemController;

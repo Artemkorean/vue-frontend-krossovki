@@ -21,7 +21,7 @@ class ItemService {
           console.error('Ошибка при создании товара:', err);
           reject(new Error(`Ошибка базы данных при создании товара: ${err.message}`));
         } else {
-          
+
           resolve({
             id: this.lastID,
             name,
@@ -91,6 +91,46 @@ class ItemService {
       });
     });
   }
+
+  static async updateItem(id, { name, price, description = '', sizes = '', image = '' }) {
+    if (!id || typeof id !== 'number' || Number.isNaN(id)) {
+      throw new Error('ID товара должен быть числом');
+    }
+    if (!name || typeof name !== 'string' || !price || typeof price !== 'number' || price <= 0) {
+      throw new Error('Название и положительная цена обязательны');
+    }
+
+    return new Promise((resolve, reject) => {
+      const query = `
+        UPDATE items
+        SET name = ?, description = ?, price = ?, sizes = ?, image = ?
+        WHERE id = ?
+      `;
+      const params = [name, description, price, sizes, image, id];
+
+      db.run(query, params, function (err) {
+        if (err) {
+          console.error('Ошибка при обновлении товара:', err);
+          reject(new Error(`Ошибка базы данных при обновлении товара: ${err.message}`));
+        } else {
+          if (this.changes === 0) {
+            reject(new Error(`Товар с id ${id} не найден`));
+          } else {
+            resolve({
+              id,
+              name,
+              description,
+              price,
+              sizes,
+              image,
+              message: 'Товар успешно обновлён'
+            });
+          }
+        }
+      });
+    });
+  }
+
 }
 
 export default ItemService;

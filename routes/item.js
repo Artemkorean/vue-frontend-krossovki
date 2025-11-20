@@ -28,6 +28,6 @@ router.delete('/:id', authenticateUser, requireAdmin, ItemController.deleteItemB
 
 // Пример: можно добавить и другие защищенные маршруты, например, обновление
 // PUT /api/items/:id
-// router.put('/:id', authenticateUser, requireAdmin, ItemController.updateItem);
+router.patch('/:id', authenticateUser, requireAdmin, ItemController.updateItem);
 
 export default router;
