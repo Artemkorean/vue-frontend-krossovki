@@ -5,7 +5,7 @@ import db from './config/database.js'
 import authRoutes from './routes/auth.js';
 import itemRoutes from './routes/item.js';
 import cartRoutes from './routes/cart.js'
-
+import orderRoutes from './routes/order.js'
 dotenv.config();
 
 const app = express();
@@ -22,7 +22,8 @@ app.use(express.json());
 
 app.use('/auth', authRoutes);
 app.use('/items', itemRoutes);
-app.use('/cart', cartRoutes)
+app.use('/cart', cartRoutes);
+app.use('/order', orderRoutes)
 
 // Простой маршрут
 app.get('/', (req, res) => {
