@@ -19,7 +19,7 @@ class OrderController {
   static getOrderById = async (req, res) => {
     try {
       const { id } = req.params;
-      const order = await OrderService.getOrderById(id);
+      const order = await OrderService.getOrderByIdWithItems(id);
       if (!order) {
         return res.status(404).json({ error: 'Заказ не найден' });
       }

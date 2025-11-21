@@ -1,11 +1,54 @@
 import db from "../config/database.js";
 
 class OrderService {
+  
+static getOrderByIdWithItems(id) {
+  return new Promise((resolve, reject) => {
+    db.get(
+      'SELECT * FROM orders WHERE id = ?',
+      [id],
+      (err, order) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (!order) {
+          resolve(null);
+          return;
+        }
+
+        db.all(
+          `
+          SELECT
+            oi.quantity,
+            oi.price_at_time,
+            oi.size,
+            i.name,
+            i.image
+          FROM order_items oi
+          JOIN items i ON oi.itemid = i.id
+          WHERE oi.orderid = ?
+          `,
+          [id],
+          (err, items) => {
+            if (err) {
+              reject(err);
+            } else {
+              order.items = items;
+              resolve(order);
+            }
+          }
+        );
+      }
+    );
+  });
+}
+
   static getAllOrders(userid = null) {
     return new Promise((resolve, reject) => {
       let sql = 'SELECT * FROM orders';
       let params = [];
-      if (userid) {
+      if (userid !== null) {
         sql += ' WHERE userid = ?';
         params = [userid];
       }
