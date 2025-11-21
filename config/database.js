@@ -51,6 +51,10 @@ db.serialize(() => {
     )
   `);
 
+  db.run(`
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_user_item_size ON carts (userid, itemid, size)
+`);
+
   // Таблица заказов
   db.run(`
     CREATE TABLE IF NOT EXISTS orders (
@@ -71,7 +75,7 @@ db.serialize(() => {
       itemid INTEGER NOT NULL,
       quantity INTEGER NOT NULL,
       price_at_time REAL NOT NULL,
-      size TEXT NOT NULL,  
+      size TEXT NOT NULL,
       FOREIGN KEY (orderid) REFERENCES orders (id) ON DELETE CASCADE,
       FOREIGN KEY (itemid) REFERENCES items (id) ON DELETE CASCADE
     )

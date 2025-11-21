@@ -1,5 +1,5 @@
 // server/controllers/CartController.js
-import CartService from '../services/CartService.js';
+import CartService from '../services/cart.js';
 
 class CartController {
   // GET /api/cart
@@ -17,16 +17,16 @@ class CartController {
 
   // POST /api/cart/add
   static async addItem(req, res) {
-    const { productId, quantity = 1 } = req.body;
+    const { productId, quantity = 1, size } = req.body; // ✅ Добавлено поле size
     const userId = req.user.id;
 
     // Валидация
-    if (!productId || quantity <= 0) {
-      return res.status(400).json({ success: false, message: 'Invalid product ID or quantity' });
+    if (!productId || quantity <= 0 || !size) {
+      return res.status(400).json({ success: false, message: 'Invalid product ID, quantity, or size' });
     }
 
     try {
-      await CartService.addItemToCart(userId, productId, quantity);
+      await CartService.addItemToCart(userId, productId, quantity, size); // ✅ Передаём size
       res.status(200).json({ success: true, message: 'Item added to cart' });
     } catch (error) {
       console.error('Error in CartController.addItem:', error);
@@ -36,16 +36,16 @@ class CartController {
 
   // PUT /api/cart/update
   static async updateItem(req, res) {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, size } = req.body; // ✅ Добавлено поле size
     const userId = req.user.id;
 
     // Валидация
-    if (!productId || quantity < 0) {
-      return res.status(400).json({ success: false, message: 'Invalid product ID or quantity' });
+    if (!productId || quantity < 0 || !size) {
+      return res.status(400).json({ success: false, message: 'Invalid product ID, quantity, or size' });
     }
 
     try {
-      await CartService.updateCartItem(userId, productId, quantity);
+      await CartService.updateCartItem(userId, productId, quantity, size); // ✅ Передаём size
       if (quantity === 0) {
         res.status(200).json({ success: true, message: 'Item removed from cart' });
       } else {
@@ -60,15 +60,16 @@ class CartController {
   // DELETE /api/cart/remove/:productId
   static async removeItem(req, res) {
     const { productId } = req.params;
+    const { size } = req.body; // ✅ Удаляем по productId + size
     const userId = req.user.id;
 
     // Валидация
-    if (!productId) {
-      return res.status(400).json({ success: false, message: 'Invalid product ID' });
+    if (!productId || !size) {
+      return res.status(400).json({ success: false, message: 'Invalid product ID or size' });
     }
 
     try {
-      await CartService.removeItemFromCart(userId, parseInt(productId, 10)); // Убедимся, что productId - число
+      await CartService.removeItemFromCart(userId, parseInt(productId, 10), size); // ✅ Передаём size
       res.status(200).json({ success: true, message: 'Item removed from cart' });
     } catch (error) {
       console.error('Error in CartController.removeItem:', error);

@@ -4,6 +4,7 @@ import cors from 'cors';
 import db from './config/database.js'
 import authRoutes from './routes/auth.js';
 import itemRoutes from './routes/item.js';
+import cartRoutes from './routes/cart.js'
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 
 app.use('/auth', authRoutes);
 app.use('/items', itemRoutes);
+app.use('/cart', cartRoutes)
 
 // Простой маршрут
 app.get('/', (req, res) => {
