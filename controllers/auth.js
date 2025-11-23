@@ -8,8 +8,8 @@ class AuthController {
 
       // Валидация входных данных
       if (!username || !email || !password) {
-        return res.status(400).json({ 
-          error: 'Нужно указать имя, почту и пароль' 
+        return res.status(400).json({
+          error: 'Нужно указать имя, почту и пароль'
         });
       }
 
@@ -30,7 +30,7 @@ class AuthController {
       if (error.message === 'Ошибка шифрования пароля') {
         return res.status(500).json({ error: error.message });
       }
-      
+
     }
   }
   // Авторизация пользователя
@@ -40,8 +40,8 @@ class AuthController {
 
       // Валидация входных данных
       if (!email || !password) {
-        return res.status(400).json({ 
-          error: 'Нужно указать почту и пароль' 
+        return res.status(400).json({
+          error: 'Нужно указать почту и пароль'
         });
       }
 
@@ -60,10 +60,10 @@ class AuthController {
       if (error.message === 'Неверный пароль') {
         return res.status(401).json({ error: error.message });
       }
-      
+
     }
   }
-  
+
   static async getProfile(req, res) {
     try {
       // req.user устанавливается middleware authenticateToken
@@ -93,7 +93,7 @@ class AuthController {
         });
       }
       // Вызов сервиса для регистрации с ролью 'admin'
-      const result = await AuthService.registerUser(admin, email, password, 'admin');
+      const result = await AuthService.registerUser(username, email, password, 'admin');
 
       res.status(201).json({
         message: 'Администратор создан',

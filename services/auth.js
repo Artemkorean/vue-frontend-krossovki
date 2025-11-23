@@ -9,7 +9,7 @@ class AuthService {
   static async registerUser(username, email, password, role = 'buyer') {
     try {
       const hash = bcrypt.hashSync(password, 10);
-      
+
       return new Promise((resolve, reject) => {
         db.run(
           'INSERT INTO users (username, email, password_hash, role) VALUES (?,?,?,?)',
@@ -110,10 +110,6 @@ class AuthService {
   }
 
   static async createAdmin(username, email, password) {
-    // Проверьте, существует ли уже администратор (необязательно, но рекомендуется)
-    // const existingAdmin = await this.getAdminUser(); // реализуйте, если нужно
-    // if (existingAdmin) throw new Error('Администратор уже существует');
-
     try {
       // Регистрируем пользователя с ролью 'admin'
       return await this.registerUser(username, email, password, 'admin');
@@ -122,45 +118,5 @@ class AuthService {
       throw error; // Перебросьте ошибку наверх
     }
   }
-  // static async initializeAdminUser() {
-  //   console.log("Проверка наличия администратора...");
-
-  //   return new Promise((resolve, reject) => {
-  //     // Проверяем, есть ли пользователь с ролью 'admin'
-  //     db.get('SELECT id FROM users WHERE role = ?', ['admin'], (err, row) => {
-  //       if (err) {
-  //         console.error("Ошибка при проверке администратора:", err);
-  //         // Важно: не вызываем reject здесь, чтобы сервер всё равно запускался
-  //         resolve(); // Продолжаем запуск
-  //         return;
-  //       }
-
-  //       if (row) {
-  //         // Администратор уже существует
-  //         console.log("Администратор уже существует в базе данных.");
-  //         resolve();
-  //       } else {
-  //         // Администратор не найден, создаем его
-  //         console.log("Администратор не найден. Создаём администратора по умолчанию...");
-  //         const defaultAdminUsername = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
-  //         const defaultAdminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@example.com';
-  //         const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'defaultPassword123!';
-
-  //         AuthService.createAdmin(defaultAdminUsername, defaultAdminEmail, defaultAdminPassword)
-  //           .then(result => {
-  //             console.log(`Администратор по умолчанию создан: ${defaultAdminUsername} (${defaultAdminEmail})`);
-  //             console.log(`ID: ${result.user.id}`);
-  //             resolve();
-  //           })
-  //           .catch(err => {
-  //             console.error("Ошибка при создании администратора по умолчанию:", err.message);
-  //             // Опционально: можно вызвать reject, если админ критически важен
-  //             // reject(err);
-  //             resolve(); // Продолжаем запуск, даже если не удалось создать админа
-  //           });
-  //       }
-  //     });
-  //   })
-  // }
 }
 export default AuthService;
