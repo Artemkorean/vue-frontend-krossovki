@@ -3,6 +3,55 @@ import db from '../config/database.js'; // Импортируем подключ
 
 class ItemService {
 
+  // Функция для получения товаров с фильтрацией и сортировкой
+  static async getFilteredItems({ sortBy = 'created_at', sortOrder = 'DESC', searchQuery = '', limit = 100, offset = 0 } = {}) {
+    return new Promise((resolve, reject) => {
+      // Проверяем, являются ли sortBy и sortOrder допустимыми полями/направлениями
+      // чтобы избежать SQL-инъекций
+      const allowedSortFields = ['id', 'name', 'price', 'created_at']; // Добавьте допустимые поля
+      const allowedSortOrders = ['ASC', 'DESC']; // или ['asc', 'desc']
+
+      // Приводим к нужному регистру и проверяем
+      const fieldToSortBy = allowedSortFields.includes(sortBy.toLowerCase()) ? sortBy.toLowerCase() : 'created_at';
+      const orderToUse = allowedSortOrders.includes(sortOrder.toUpperCase()) ? sortOrder.toUpperCase() : 'DESC';
+
+      // Базовый SQL-запрос
+      let sql = 'SELECT * FROM items';
+      const params = []; // Параметры для подготовленного запроса
+      const conditions = []; // Условия WHERE
+
+      // Добавляем условие поиска, если searchQuery предоставлен
+      if (searchQuery) {
+        conditions.push('name LIKE ?'); // Ищем в поле title (или других полях)
+        params.push(`%${searchQuery}%`); // Подставляем значение с % для LIKE
+      }
+
+      // Добавляем WHERE, если есть условия
+      if (conditions.length > 0) {
+        sql += ' WHERE ' + conditions.join(' AND ');
+      }
+
+      // Добавляем сортировку
+      sql += ` ORDER BY ${fieldToSortBy} ${orderToUse}`;
+
+      // Добавляем лимит и смещение
+      sql += ' LIMIT ? OFFSET ?';
+      params.push(limit, offset); // Добавляем limit и offset в конец params
+
+      // console.log('Executing SQL:', sql, params); // Для отладки
+
+      // Используем db.all, так как ожидаем массив результатов
+      db.all(sql, params, (err, rows) => {
+        if (err) {
+          console.error('Ошибка при получении отфильтрованных товаров:', err);
+          reject(new Error(`Ошибка базы данных: ${err.message}`));
+        } else {
+          resolve(rows); // Возвращаем массив отфильтрованных/отсортированных товаров
+        }
+      });
+    });
+  }
+
   static async createItem(name, price, description = '', sizes = '', image = '') {
     // Валидация (базовая)
     if (!name || typeof name !== 'string' || !price || typeof price !== 'number' || price <= 0) {
@@ -63,7 +112,7 @@ class ItemService {
       });
     });
   }
-  // Может быть полезен для проверки существования или получения данных перед обновлением
+  
   static async getItemById(itemId) {
     return new Promise((resolve, reject) => {
       const query = 'SELECT * FROM items WHERE id = ?';

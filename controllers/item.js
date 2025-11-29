@@ -2,6 +2,32 @@
 import ItemService from '../services/item.js';
 
 class ItemController {
+  static async getItemsWithFilters (req, res) {
+    try {
+      // Извлекаем параметры из запроса
+      const {
+        sortBy = 'created_at',
+        sortOrder = 'DESC',
+        searchQuery = '',
+        limit = 100,
+        offset = 0
+      } = req.query;
+
+      // Вызываем серверную функцию с этими параметрами
+      const items = await ItemService.getFilteredItems({
+        sortBy,
+        sortOrder,
+        searchQuery,
+        limit: parseInt(limit, 10), // Убедитесь, что это число
+        offset: parseInt(offset, 10)  // Убедитесь, что это число
+      });
+
+      res.json(items); // Отправляем отфильтрованные/отсортированные товары клиенту
+    } catch (err) {
+      console.error('Ошибка в контроллере getItemsWithFilters:', err);
+      res.status(500).json({ error: err.message });
+    }
+  };
 
   static async createItem(req, res) {
     try {
@@ -123,7 +149,7 @@ class ItemController {
     }
     return res.status(400).json({ error: error.message });
   }
-}
+  }
 }
 
 export default ItemController;
